@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Library</title>
+    <style>
+        :root {
+            --bg-color: #131313;
+            --text-color: #E0E0E0;
+            --text-light: #FFFFFF;
+            --primary-accent: #4CAF50;
+            --secondary-accent: #FF4081;
+            --card-bg: #1E1E1E;
+            --border-color: #333;
+            --hover-bg: #2A2A2A;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --pronunciation-bg: rgba(255, 64, 129, 0.1);
+            --pronunciation-border: rgba(255, 64, 129, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: var(--text-color);
+            font-weight: 300;
+        }
+
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            transition: var(--transition);
+            outline: none;
+            min-height: 48px;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            min-height: 48px;
+            min-width: 48px;
+        }
+
+        .filter-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary-accent);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-accent);
+            border-color: var(--primary-accent);
+            color: var(--text-light);
+        }
+
+        .stats {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-text {
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .translation-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .translation-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            border-color: var(--primary-accent);
+        }
+
+        .english-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-accent);
+        }
+
+        .english-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .pronunciation {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: var(--pronunciation-bg);
+            border: 1px solid var(--pronunciation-border);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--secondary-accent);
+            font-family: 'Courier New', monospace;
+        }
+
+        .pronunciation-icon {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .translations {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .translation-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .translation-item:hover {
+            background: var(--hover-bg);
+            transform: translateX(4px);
+        }
+
+        .language-flag {
+            font-size: 1.5rem;
+            min-width: 2rem;
+        }
+
+        .language-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .language-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .language-name {
+            font-weight: 600;
+            color: var(--secondary-accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .translation-text {
+            color: var(--text-light);
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .translation-pronunciation {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            font-style: italic;
+            font-family: 'Courier New', monospace;
+            opacity: 0.8;
+            margin-top: 0.1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-color);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-results-text {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-results-subtitle {
+            opacity: 0.7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-color);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem 0.75rem;
+            }
+
+            .filters {
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .translation-card {
+                padding: 1rem;
+            }
+
+            .english-text {
+                font-size: 1.1rem;
+            }
+
+            .pronunciation {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
+            }
+
+            .language-name {
+                font-size: 0.8rem;
+            }
+
+            .translation-text {
+                font-size: 1rem;
+            }
+
+            .translation-pronunciation {
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-input {
+                padding: 0.875rem 1rem;
+                font-size: 1rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .translation-item {
+                padding: 0.5rem;
+            }
+
+            .language-flag {
+                font-size: 1.25rem;
+            }
+
+            .english-text {
+                font-size: 1rem;
+            }
+
+            .pronunciation {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .filter-btn:focus {
+            outline: 2px solid var(--primary-accent);
+            outline-offset: 2px;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Pronunciation tooltip effect */
+        .pronunciation:hover {
+            transform: scale(1.05);
+            background: rgba(255, 64, 129, 0.15);
+        }
+
+        .translation-item:hover .translation-pronunciation {
+            opacity: 1;
+            color: var(--secondary-accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">Translation Library</h1>
+            <p class="subtitle">Discover common words and phrases with pronunciation guides</p>
+        </header>
+
+        <main>
+            <section class="search-section">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        placeholder="Search for words, phrases, or pronunciations..." 
+                        id="searchInput"
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="filters">
+                    <button class="filter-btn active" data-category="all">All Categories</button>
+                    <button class="filter-btn" data-category="greetings">Greetings</button>
+                    <button class="filter-btn" data-category="common">Common Phrases</button>
+                    <button class="filter-btn" data-category="food">Food & Drink</button>
+                    <button class="filter-btn" data-category="travel">Travel</button>
+                    <button class="filter-btn" data-category="numbers">Numbers</button>
+                </div>
+            </section>
+
+            <section class="stats">
+                <p class="stats-text" id="statsText">Showing <strong>0</strong> translations</p>
+            </section>
+
+            <section class="results">
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Loading translations...</p>
+                </div>
+                <div class="results-grid" id="resultsGrid"></div>
+                <div class="no-results" id="noResults" style="display: none;">
+                    <div class="no-results-icon">🔍</div>
+                    <div class="no-results-text">No translations found</div>
+                    <div class="no-results-subtitle">Try adjusting your search or filter</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+// Translation data with pronunciations
+        const translations = [
+            {
+                english: "Hello",
+                pronunciation: "həˈloʊ",
+                category: "greetings",
+                translations: {
+                    russian: { text: "Привет", pronunciation: "pri-VYET" },
+                    slovakian: { text: "Ahoj", pronunciation: "AH-hoy" },
+                    finnish: { text: "Hei", pronunciation: "HAY" },
+                    french: { text: "Bonjour", pronunciation: "bon-ZHOOR" },
+                    german: { text: "Hallo", pronunciation: "HAH-lo" }
+                }
+            },
+            {
+                english: "Good morning",
+                pronunciation: "ɡʊd ˈmɔrnɪŋ",
+                category: "greetings",
+                translations: {
+                    russian: { text: "Доброе утро", pronunciation: "DOB-ro-ye OO-tro" },
+                    slovakian: { text: "Dobré ráno", pronunciation: "DOB-ray RAH-no" },
+                    finnish: { text: "Hyvää huomenta", pronunciation: "HU-vaa HUO-men-ta" },
+                    french: { text: "Bonjour", pronunciation: "bon-ZHOOR" },
+                    german: { text: "Guten Morgen", pronunciation: "GOO-ten MOR-gen" }
+                }
+            },
+            {
+                english: "Good evening",
+                pronunciation: "ɡʊd ˈivnɪŋ",
+                category: "greetings",
+                translations: {
+                    russian: { text: "Добрый вечер", pronunciation: "DOB-ryy VYE-cher" },
+                    slovakian: { text: "Dobrý večer", pronunciation: "DOB-ree VEH-cher" },
+                    finnish: { text: "Hyvää iltaa", pronunciation: "HU-vaa IL-taa" },
+                    french: { text: "Bonsoir", pronunciation: "bon-SWAHR" },
+                    german: { text: "Guten Abend", pronunciation: "GOO-ten AH-bent" }
+                }
+            },
+            {
+                english: "Goodbye",
+                pronunciation: "ɡʊdˈbaɪ",
+                category: "greetings",
+                translations: {
+                    russian: { text: "До свидания", pronunciation: "do svi-DAH-ni-ya" },
+                    slovakian: { text: "Dovidenia", pronunciation: "do-vi-DEH-ni-ya" },
+                    finnish: { text: "Näkemiin", pronunciation: "NAE-ke-miin" },
+                    french: { text: "Au revoir", pronunciation: "oh ruh-VWAHR" },
+                    german: { text: "Auf Wiedersehen", pronunciation: "owf VEE-der-zayn" }
+                }
+            },
+            {
+                english: "Thank you",
+                pronunciation: "θæŋk ju",
+                category: "common",
+                translations: {
+                    russian: { text: "Спасибо", pronunciation: "spa-SEE-bo" },
+                    slovakian: { text: "Ďakujem", pronunciation: "DYA-ku-yem" },
+                    finnish: { text: "Kiitos", pronunciation: "KEE-tos" },
+                    french: { text: "Merci", pronunciation: "mer-SEE" },
+                    german: { text: "Danke", pronunciation: "DAHN-ke" }
+                }
+            },
+            {
+                english: "You're welcome",
+                pronunciation: "jʊr ˈwɛlkəm",
+                category: "common",
+                translations: {
+                    russian: { text: "Пожалуйста", pronunciation: "po-ZHAL-uy-sta" },
+                    slovakian: { text: "Prosím", pronunciation: "pro-SEEM" },
+                    finnish: { text: "Ole hyvä", pronunciation: "O-le HU-vaa" },
+                    french: { text: "De rien", pronunciation: "duh ree-AHN" },
+                    german: { text: "Bitte schön", pronunciation: "BIT-te shern" }
+                }
+            },
+            {
+                english: "Please",
+                pronunciation: "pliz",
+                category: "common",
+                translations: {
+                    russian: { text: "Пожалуйста", pronunciation: "po-ZHAL-uy-sta" },
+                    slovakian: { text: "Prosím", pronunciation: "pro-SEEM" },
+                    finnish: { text: "Kiitos", pronunciation: "KEE-tos" },
+                    french: { text: "S'il vous plaît", pronunciation: "seel voo PLAY" },
+                    german: { text: "Bitte", pronunciation: "BIT-te" }
+                }
+            },
+            {
+                english: "Excuse me",
+                pronunciation: "ɪkˈskjuz mi",
+                category: "common",
+                translations: {
+                    russian: { text: "Извините", pronunciation: "iz-vi-NEE-te" },
+                    slovakian: { text: "Prepáčte", pronunciation: "pre-PAACH-te" },
+                    finnish: { text: "Anteeksi", pronunciation: "AN-teek-si" },
+                    french: { text: "Excusez-moi", pronunciation: "ek-sku-zay MWAH" },
+                    german: { text: "Entschuldigung", pronunciation: "ent-SHUL-di-gung" }
+                }
+            },
+            {
+                english: "I'm sorry",
+                pronunciation: "aɪm ˈsɔri",
+                category: "common",
+                translations: {
+                    russian: { text: "Извините", pronunciation: "iz-vi-NEE-te" },
+                    slovakian: { text: "Prepáčte", pronunciation: "pre-PAACH-te" },
+                    finnish: { text: "Olen pahoillani", pronunciation: "O-len pa-HOI-lla-ni" },
+                    french: { text: "Je suis désolé", pronunciation: "zhuh swee day-zo-LAY" },
+                    german: { text: "Es tut mir leid", pronunciation: "es toot meer LIDE" }
+                }
+            },
+            {
+                english: "How are you?",
+                pronunciation: "haʊ ɑr ju",
+                category: "common",
+                translations: {
+                    russian: { text: "Как дела?", pronunciation: "kak de-LAH" },
+                    slovakian: { text: "Ako sa máš?", pronunciation: "AH-ko sa MAASH" },
+                    finnish: { text: "Mitä kuuluu?", pronunciation: "MI-taa KUU-luu" },
+                    french: { text: "Comment allez-vous?", pronunciation: "ko-mahn tah-lay VOO" },
+                    german: { text: "Wie geht es dir?", pronunciation: "vee gayt es DEER" }
+                }
+            },
+            {
+                english: "Water",
+                pronunciation: "ˈwɔtər",
+                category: "food",
+                translations: {
+                    russian: { text: "Вода", pronunciation: "vo-DAH" },
+                    slovakian: { text: "Voda", pronunciation: "VO-da" },
+                    finnish: { text: "Vesi", pronunciation: "VE-si" },
+                    french: { text: "Eau", pronunciation: "OH" },
+                    german: { text: "Wasser", pronunciation: "VAS-ser" }
+                }
+            },
+            {
+                english: "Coffee",
+                pronunciation: "ˈkɔfi",
+                category: "food",
+                translations: {
+                    russian: { text: "Кофе", pronunciation: "KO-fe" },
+                    slovakian: { text: "Káva", pronunciation: "KAA-va" },
+                    finnish: { text: "Kahvi", pronunciation: "KAH-vi" },
+                    french: { text: "Café", pronunciation: "ka-FAY" },
+                    german: { text: "Kaffee", pronunciation: "ka-FAY" }
+                }
+            },
+            {
+                english: "Tea",
+                pronunciation: "ti",
+                category: "food",
+                translations: {
+                    russian: { text: "Чай", pronunciation: "CHAI" },
+                    slovakian: { text: "Čaj", pronunciation: "CHAI" },
+                    finnish: { text: "Tee", pronunciation: "TEE" },
+                    french: { text: "Thé", pronunciation: "TAY" },
+                    german: { text: "Tee", pronunciation: "TAY" }
+                }
+            },
+            {
+                english: "Bread",
+                pronunciation: "brɛd",
+                category: "food",
+                translations: {
+                    russian: { text: "Хлеб", pronunciation: "KHLEB" },
+                    slovakian: { text: "Chlieb", pronunciation: "KHLEE-eb" },
+                    finnish: { text: "Leipä", pronunciation: "LAY-paa" },
+                    french: { text: "Pain", pronunciation: "PAHN" },
+                    german: { text: "Brot", pronunciation: "BROHT" }
+                }
+            },
+            {
+                english: "Milk",
+                pronunciation: "mɪlk",
+                category: "food",
+                translations: {
+                    russian: { text: "Молоко", pronunciation: "mo-lo-KO" },
+                    slovakian: { text: "Mlieko", pronunciation: "MLEE-e-ko" },
+                    finnish: { text: "Maito", pronunciation: "MAI-to" },
+                    french: { text: "Lait", pronunciation: "LAY" },
+                    german: { text: "Milch", pronunciation: "MILKH" }
+                }
+            },
+            {
+                english: "Where is...?",
+                pronunciation: "wɛr ɪz",
+                category: "travel",
+                translations: {
+                    russian: { text: "Где...?", pronunciation: "GDYE" },
+                    slovakian: { text: "Kde je...?", pronunciation: "KDEH yeh" },
+                    finnish: { text: "Missä on...?", pronunciation: "MIS-saa on" },
+                    french: { text: "Où est...?", pronunciation: "OO eh" },
+                    german: { text: "Wo ist...?", pronunciation: "vo IST" }
+                }
+            },
+            {
+                english: "Train station",
+                pronunciation: "treɪn ˈsteɪʃən",
+                category: "travel",
+                translations: {
+                    russian: { text: "Вокзал", pronunciation: "vok-ZAHL" },
+                    slovakian: { text: "Železničná stanica", pronunciation: "zhe-LEZ-nich-naa STA-nit-sa" },
+                    finnish: { text: "Rautatieasema", pronunciation: "RAU-ta-tie-a-se-ma" },
+                    french: { text: "Gare", pronunciation: "GAHR" },
+                    german: { text: "Bahnhof", pronunciation: "BAHN-hohf" }
+                }
+            },
+            {
+                english: "Airport",
+                pronunciation: "ˈɛrˌpɔrt",
+                category: "travel",
+                translations: {
+                    russian: { text: "Аэропорт", pronunciation: "a-e-ro-PORT" },
+                    slovakian: { text: "Letisko", pronunciation: "LE-tis-ko" },
+                    finnish: { text: "Lentokenttä", pronunciation: "LEN-to-kent-taa" },
+                    french: { text: "Aéroport", pronunciation: "a-ay-ro-POR" },
+                    german: { text: "Flughafen", pronunciation: "FLOOK-hah-fen" }
+                }
+            },
+            {
+                english: "Hotel",
+                pronunciation: "hoʊˈtɛl",
+                category: "travel",
+                translations: {
+                    russian: { text: "Отель", pronunciation: "o-TEL" },
+                    slovakian: { text: "Hotel", pronunciation: "ho-TEL" },
+                    finnish: { text: "Hotelli", pronunciation: "ho-TEL-li" },
+                    french: { text: "Hôtel", pronunciation: "oh-TELL" },
+                    german: { text: "Hotel", pronunciation: "ho-TELL" }
+                }
+            },
+            {
+                english: "Help",
+                pronunciation: "hɛlp",
+                category: "travel",
+                translations: {
+                    russian: { text: "Помощь", pronunciation: "po-MOSHCH" },
+                    slovakian: { text: "Pomoc", pronunciation: "PO-mots" },
+                    finnish: { text: "Apua", pronunciation: "A-pu-a" },
+                    french: { text: "Aide", pronunciation: "EHD" },
+                    german: { text: "Hilfe", pronunciation: "HIL-fe" }
+                }
+            },
+            {
+                english: "One",
+                pronunciation: "wʌn",
+                category: "numbers",
+                translations: {
+                    russian: { text: "Один", pronunciation: "a-DEEN" },
+                    slovakian: { text: "Jeden", pronunciation: "YE-den" },
+                    finnish: { text: "Yksi", pronunciation: "UK-si" },
+                    french: { text: "Un", pronunciation: "UHN" },
+                    german: { text: "Eins", pronunciation: "INES" }
+                }
+            },
+            {
+                english: "Two",
+                pronunciation: "tu",
+                category: "numbers",
+                translations: {
+                    russian: { text: "Два", pronunciation: "DVAH" },
+                    slovakian: { text: "Dva", pronunciation: "DVAH" },
+                    finnish: { text: "Kaksi", pronunciation: "KAK-si" },
+                    french: { text: "Deux", pronunciation: "DUH" },
+                    german: { text: "Zwei", pronunciation: "TSVAI" }
+                }
+            },
+            {
+                english: "Three",
+                pronunciation: "θri",
+                category: "numbers",
+                translations: {
+                    russian: { text: "Три", pronunciation: "TREE" },
+                    slovakian: { text: "Tri", pronunciation: "TREE" },
+                    finnish: { text: "Kolme", pronunciation: "KOL-me" },
+                    french: { text: "Trois", pronunciation: "TWAH" },
+                    german: { text: "Drei", pronunciation: "DRAI" }
+                }
+            },
+            {
+                english: "Four",
+                pronunciation: "fɔr",
+                category: "numbers",
+                translations: {
+                    russian: { text: "Четыре", pronunciation: "che-TY-re" },
+                    slovakian: { text: "Štyri", pronunciation: "SHTY-ri" },
+                    finnish: { text: "Neljä", pronunciation: "NEL-yaa" },
+                    french: { text: "Quatre", pronunciation: "KAH-truh" },
+                    german: { text: "Vier", pronunciation: "FEER" }
+                }
+            },
+            {
+                english: "Five",
+                pronunciation: "faɪv",
+                category: "numbers",
+                translations: {
+                    russian: { text: "Пять", pronunciation: "PYAT" },
+                    slovakian: { text: "Päť", pronunciation: "PYAT" },
+                    finnish: { text: "Viisi", pronunciation: "VEE-si" },
+                    french: { text: "Cinq", pronunciation: "SANK" },
+                    german: { text: "Fünf", pronunciation: "FUENF" }
+                }
+            }
+        ];
+
+        // Language flags and info
+        const languageInfo = {
+            russian: { flag: "🇷🇺", name: "Russian" },
+            slovakian: { flag: "🇸🇰", name: "Slovak" },
+            finnish: { flag: "🇫🇮", name: "Finnish" },
+            french: { flag: "🇫🇷", name: "French" },
+            german: { flag: "🇩🇪", name: "German" }
+        };
+
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const statsText = document.getElementById('statsText');
+        const noResults = document.getElementById('noResults');
+        const loading = document.getElementById('loading');
+
+        // State
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let filteredResults = [...translations];
+
+        // Initialize app
+        function init() {
+            renderResults(translations);
+            updateStats(translations.length);
+            attachEventListeners();
+        }
+
+        // Event listeners
+        function attachEventListeners() {
+            searchInput.addEventListener('input', handleSearch);
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', handleFilter);
+            });
+        }
+
+// Handle search
+       function handleSearch(e) {
+           currentSearch = e.target.value.toLowerCase().trim();
+           filterAndRender();
+       }
+
+       // Handle filter
+       function handleFilter(e) {
+           const category = e.target.dataset.category;
+           
+           // Update active filter button
+           filterBtns.forEach(btn => btn.classList.remove('active'));
+           e.target.classList.add('active');
+           
+           currentFilter = category;
+           filterAndRender();
+       }
+
+       // Filter and render results
+       function filterAndRender() {
+           showLoading();
+           
+           setTimeout(() => {
+               let results = [...translations];
+               
+               // Apply category filter
+               if (currentFilter !== 'all') {
+                   results = results.filter(item => item.category === currentFilter);
+               }
+               
+               // Apply search filter
+               if (currentSearch) {
+                   results = results.filter(item => {
+                       const searchTerm = currentSearch.toLowerCase();
+                       
+                       // Search in English text
+                       if (item.english.toLowerCase().includes(searchTerm)) {
+                           return true;
+                       }
+                       
+                       // Search in English pronunciation
+                       if (item.pronunciation.toLowerCase().includes(searchTerm)) {
+                           return true;
+                       }
+                       
+                       // Search in translations
+                       return Object.values(item.translations).some(translation => 
+                           translation.text.toLowerCase().includes(searchTerm) ||
+                           translation.pronunciation.toLowerCase().includes(searchTerm)
+                       );
+                   });
+               }
+               
+               filteredResults = results;
+               renderResults(results);
+               updateStats(results.length);
+               hideLoading();
+           }, 200);
+       }
+
+       // Show loading state
+       function showLoading() {
+           loading.style.display = 'block';
+           resultsGrid.style.display = 'none';
+           noResults.style.display = 'none';
+       }
+
+       // Hide loading state
+       function hideLoading() {
+           loading.style.display = 'none';
+           resultsGrid.style.display = 'grid';
+       }
+
+       // Render results
+       function renderResults(results) {
+           if (results.length === 0) {
+               resultsGrid.style.display = 'none';
+               noResults.style.display = 'block';
+               return;
+           }
+
+           noResults.style.display = 'none';
+           resultsGrid.style.display = 'grid';
+           
+           resultsGrid.innerHTML = results.map(item => createTranslationCard(item)).join('');
+       }
+
+       // Create translation card HTML
+       function createTranslationCard(item) {
+           const translationItems = Object.entries(item.translations)
+               .map(([lang, translation]) => `
+                   <div class="translation-item">
+                       <span class="language-flag">${languageInfo[lang].flag}</span>
+                       <div class="language-content">
+                           <div class="language-header">
+                               <span class="language-name">${languageInfo[lang].name}</span>
+                           </div>
+                           <div class="translation-text">${translation.text}</div>
+                           <div class="translation-pronunciation">${translation.pronunciation}</div>
+                       </div>
+                   </div>
+               `).join('');
+
+           return `
+               <div class="translation-card">
+                   <div class="english-section">
+                       <div class="english-text">${item.english}</div>
+                       <div class="pronunciation">
+                           <span class="pronunciation-icon"></span>
+                           ${item.pronunciation}
+                       </div>
+                   </div>
+                   <div class="translations">
+                       ${translationItems}
+                   </div>
+               </div>
+           `;
+       }
+
+       // Update stats
+       function updateStats(count) {
+           const total = translations.length;
+           statsText.innerHTML = `Showing <strong>${count}</strong> of <strong>${total}</strong> translations`;
+       }
+
+       // Initialize the app
+       init();
+   </script>
+</body>
+</html>
