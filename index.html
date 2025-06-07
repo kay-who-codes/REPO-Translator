@@ -9,16 +9,16 @@
             --bg-color: #131313;
             --text-color: #E0E0E0;
             --text-light: #FFFFFF;
-            --primary-accent: #4CAF50;
-            --secondary-accent: #FF4081;
+            --primary-accent: #2e79a5;
+            --secondary-accent: #40ffdf;
             --card-bg: #1E1E1E;
             --border-color: #333;
             --hover-bg: #2A2A2A;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             --border-radius: 12px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --pronunciation-bg: rgba(255, 64, 129, 0.1);
-            --pronunciation-border: rgba(255, 64, 129, 0.3);
+            --pronunciation-bg: rgba(64, 249, 255, 0.1);
+            --pronunciation-border: rgba(64, 233, 255, 0.3);
         }
 
         * {
@@ -33,6 +33,17 @@
             color: var(--text-color);
             line-height: 1.6;
             min-height: 100vh;
+        }
+
+        a {
+            color: rgb(255, 113, 61);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: rgb(255, 147, 108);
+            text-decoration: underline;
         }
 
         .container {
@@ -187,9 +198,8 @@
             border: 1px solid var(--pronunciation-border);
             border-radius: 20px;
             font-size: 0.9rem;
-            font-style: italic;
             color: var(--secondary-accent);
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial';
         }
 
         .pronunciation-icon {
@@ -254,7 +264,7 @@
             font-size: 0.8rem;
             color: var(--text-color);
             font-style: italic;
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial';
             opacity: 0.8;
             margin-top: 0.1rem;
         }
@@ -402,6 +412,7 @@
         <header>
             <h1 class="title">REPO Translator</h1>
             <p class="subtitle">Translate common R.E.P.O. words and phrases with pronunciation guides</p>
+            <a href="https://translate.google.com" target="_blank" rel="noopener noreferrer">Open Google Translate</a>
         </header>
 
         <main>
